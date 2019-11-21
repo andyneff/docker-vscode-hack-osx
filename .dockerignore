@@ -1,0 +1,4 @@
+*
+!docker
+!external/vsi_common
+!vscode.env
