@@ -1,0 +1,24 @@
+version: "2.3"
+
+services:
+  vscode_server:
+    build:
+      context: .
+    image: vscode_server
+    ports:
+      - "4022:22"
+    volumes:
+     - source: ssh_keys
+       target: /etc/ssh
+       type: volume
+     - type: bind
+       source: /
+       target: /host
+#     - type: bind
+#       source: ${SOURCE_DIR-/Users/a-andy/vsi_common}
+#       target: /src
+#    ipc: private
+#    network_mode: default
+
+volumes:
+  ssh_keys:

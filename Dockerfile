@@ -1,12 +1,19 @@
 FROM centos:latest
 
-RUN yum install -y openssh-server
+SHELL ["/usr/bin/env", "bash", "-euxvc"]
 
-RUN mkdir /var/run/sshd
-RUN echo 'root:DanielSmithRocks' | chpasswd
-RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN yum install -y openssh-server ca-certificates; \
+    echo "root:ChangeM3" | chpasswd; \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config; \
+    mkdir /var/run/sshd
 
+VOLUME /etc/ssh
 EXPOSE 22
-RUN /usr/bin/ssh-keygen -A
 
-CMD ["/usr/sbin/sshd", "-D"]
+RUN echo 'echo "$*" > /tmp/foo.txt; exec /usr/bin/curl "${@}"' > /usr/local/bin/curl; \
+    chmod 755 /usr/local/bin/curl
+
+CMD if [ ! -e /etc/ssh/ssh_host_dsa_key ]; then \
+      ssh-keygen -A; \
+    fi; \
+    /usr/sbin/sshd -D
