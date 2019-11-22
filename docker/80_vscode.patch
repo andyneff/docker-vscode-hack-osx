@@ -11,7 +11,7 @@ function check_password()
 }
 
 source /vsi/linux/elements.bsh
-MIFS=// split_s just_docker_entrypoint_internal_volumes "${JUST_DOCKER_ENTRYPOINT_INTERNAL_VOLUMES}"
+MIFS=// split_s just_docker_entrypoint_internal_volumes "${JUST_DOCKER_ENTRYPOINT_INTERNAL_VOLUMES-}"
 remove_element_a just_docker_entrypoint_internal_volumes /etc/ssh
 remove_element_a just_docker_entrypoint_internal_volumes /var/passwd
 join_a JUST_DOCKER_ENTRYPOINT_INTERNAL_VOLUMES ${just_docker_entrypoint_internal_volumes[@]+"${just_docker_entrypoint_internal_volumes[@]}"} || : #don't care if it's empty
@@ -28,6 +28,3 @@ fi
 
 # This command can take a few seconds if wrong, and I don't want to wait.
 check_password&
-
-# Yes, check_password still runs in the background after the exec
-exec "${@}"

@@ -5,6 +5,7 @@ source "${VSI_COMMON_DIR}/linux/just_env" "$(dirname "${BASH_SOURCE[0]}")"/'vsco
 source "${VSI_COMMON_DIR}/linux/docker_functions.bsh"
 source "${VSI_COMMON_DIR}/linux/just_docker_functions.bsh"
 source "${VSI_COMMON_DIR}/linux/just_git_functions.bsh"
+source "${VSI_COMMON_DIR}/linux/just_singularity_functions.bsh"
 
 cd "${VSCODE_CWD}"
 
@@ -23,6 +24,31 @@ function caseify()
         Docker-compose build
       fi
       ;;
+    build_singular) # Build singularity images for terra dsm
+      justify build
+      (
+        . ${VSCODE_SINGULAR_COMPOSE_FILES}
+
+        for instance in ${instances[@]+"${instances[@]}"}; do
+          image="${instance}_image"
+          docker_image="${instance}_docker_image"
+          justify singularity import -n "${!image}" "${!docker_image}"
+        done
+      )
+      ;;
+    singular_setup) # Setup singularity install
+      VSCODE_SSH_CONFIG_DIR_DOCKER=/etc/ssh2 justify singular-compose exec vscode bash -c 'cp /etc/ssh/* /etc/ssh2/'
+      sed -i '/^ *Port .*/d;
+              /^ *UsePAM .*/d;
+              /^ *PasswordAuthentication .*/d;
+              /^ *UsePriviledgeSeparation.*/d' "${VSCODE_CWD}/singular/ssh_config/sshd_config"
+      echo >> "${VSCODE_CWD}/singular/ssh_config/sshd_config"
+      echo "Port ${VSCODE_SSHD_PORT}" >> "${VSCODE_CWD}/singular/ssh_config/sshd_config"
+      echo "UsePAM no" >> "${VSCODE_CWD}/singular/ssh_config/sshd_config"
+      echo "UsePrivilegeSeparation no" >> "${VSCODE_CWD}/singular/ssh_config/sshd_config"
+      echo "PasswordAuthentication no" >> "${VSCODE_CWD}/singular/ssh_config/sshd_config"
+      ;;
+
     run_vscode-server) # Run vscode server
       Just-docker-compose run --service-ports vscode ${@+"${@}"}
       extra_args=$#

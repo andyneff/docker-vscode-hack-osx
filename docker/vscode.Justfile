@@ -7,9 +7,9 @@ function caseify()
   case "${cmd}" in
     sshd) # Run sshd
       if [ ! -e /etc/ssh/ssh_host_dsa_key ]; then
-        gosu root ssh-keygen -A
+        ssh-keygen -A
       fi
-      exec gosu root /usr/sbin/sshd -D ${@+"${@}"}
+      exec /usr/sbin/sshd -D ${@+"${@}"}
       ;;
 
     password)
