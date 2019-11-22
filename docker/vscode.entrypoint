@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -eu
+
+function check_password()
+{
+  if echo ChangeM3 | su -p -s /usr/bin/bash -c "su root -c true" bin &> /dev/null; then
+    echo "WARNING: Your root password is still 'ChangeM3'. You should change this by" >&2
+    echo "running: just change password" >&2
+  fi
+}
+
+source /vsi/linux/elements.bsh
+MIFS=// split_s just_docker_entrypoint_internal_volumes "${JUST_DOCKER_ENTRYPOINT_INTERNAL_VOLUMES}"
+remove_element_a just_docker_entrypoint_internal_volumes /etc/ssh
+remove_element_a just_docker_entrypoint_internal_volumes /var/passwd
+join_a JUST_DOCKER_ENTRYPOINT_INTERNAL_VOLUMES ${just_docker_entrypoint_internal_volumes[@]+"${just_docker_entrypoint_internal_volumes[@]}"} || : #don't care if it's empty
+export JUST_DOCKER_ENTRYPOINT_INTERNAL_VOLUMES
+
+if [ -e /var/passwd/passwd ]; then
+  cp /var/passwd/passwd /etc/passwd
+  # Symlink bad here https://serverfault.com/a/491111/321910
+fi
+
+if [ -e /var/passwd/shadow ]; then
+  cp /var/passwd/shadow /etc/shadow
+fi
+
+# This command can take a few seconds if wrong, and I don't want to wait.
+check_password&
+
+# Yes, check_password still runs in the background after the exec
+exec "${@}"

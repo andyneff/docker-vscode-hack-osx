@@ -1,24 +1,40 @@
 version: "2.3"
 
 services:
-  vscode_server:
+  vscode:
     build:
       context: .
-    image: vscode_server
+      dockerfile: docker/vscode.Dockerfile
+    image: andyneff/vscode:latest
+    environment:
+      # Variables for just_entrypoint_functions
+      - DOCKER_UID=${VSCODE_UID}
+      - DOCKER_GIDS=${VSCODE_GIDS}
+      - DOCKER_GROUP_NAMES=${VSCODE_GROUP_NAMES}
+      - DOCKER_USERNAME=user
+      # - DISPLAY
+      - JUSTFILE=/vscode/docker/vscode.Justfile
+      - JUST_SETTINGS=/vscode/vscode.env
+      - TZ
     ports:
-      - "4022:22"
+      - "${VSCODE_SSHD_PORT}:22"
     volumes:
-     - source: ssh_keys
-       target: /etc/ssh
-       type: volume
-     - type: bind
-       source: /
-       target: /host
-#     - type: bind
-#       source: ${SOURCE_DIR-/Users/a-andy/vsi_common}
-#       target: /src
-#    ipc: private
-#    network_mode: default
+      - source: ${VSCODE_CWD}
+        target: /vscode
+        type: bind
+      - source: ${VSCODE_SSH_CONFIG_DIR}
+        target: ${VSCODE_SSH_CONFIG_DIR_DOCKER}
+        type: ${VSCODE_SSH_CONFIG_DIR_TYPE}
+      - source: ${VSCODE_DATA_DIR}
+        target: ${VSCODE_DATA_DIR_DOCKER}
+        type: ${VSCODE_DATA_DIR_TYPE}
+      - source: ${VSCODE_PASSWD_DIR}
+        target: ${VSCODE_PASSWD_DIR_DOCKER}
+        type: ${VSCODE_PASSWD_DIR_TYPE}
+      - source: ${VSI_COMMON_DIR}
+        target: /vsi
+        type: bind
 
 volumes:
   ssh_keys:
+  passwd:

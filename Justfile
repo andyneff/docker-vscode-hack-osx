@@ -23,9 +23,24 @@ function caseify()
         Docker-compose build
       fi
       ;;
-    run_vscode) # Run vscode 1
+    run_vscode-server) # Run vscode server
       Just-docker-compose run --service-ports vscode ${@+"${@}"}
       extra_args=$#
+      ;;
+    shell) # Run vscode server shell (for debugging)
+      Just-docker-compose run vscode bash ${@+"${@}"}
+      extra_args=$#
+      ;;
+    up) # Start up ssh daemon
+      Just-docker-compose up ${@+"${@}"}
+      extra_args=$#
+      ;;
+    down) # Shut down ssh daemon
+      Just-docker-compose down ${@+"${@}"}
+      extra_args=$#
+      ;;
+    change_password) # Change root password
+      Just-docker-compose run vscode password
       ;;
 
     sync) # Synchronize the many aspects of the project when new code changes \

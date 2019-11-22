@@ -12,6 +12,12 @@ issue is not clogged like a forum thread.
 
 Please create an Issue here to ask your question.  Please check Closed Issues before asking your question.
 
+## Install
+
+1. `. setup.env`
+2. `just change password`
+3. `just run vscode-server`
+
 ## Instructions
 
 ### Remote Host
