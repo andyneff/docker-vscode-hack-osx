@@ -6,10 +6,28 @@ function caseify()
   shift 1
   case "${cmd}" in
     sshd) # Run sshd
-      if [ ! -e /etc/ssh/ssh_host_dsa_key ]; then
-        ssh-keygen -A
+      local PRECMD=
+      local SSHD_FLAGS=
+      if [ -z "${SINGULARITY_NAME+set}" ]; then
+        PRECMD="gosu root"
+      else
+        sed -e '/^ *Port .*/d' \
+            -e '$aPort '"${VSCODE_SSHD_PORT}" \
+            /etc/ssh/sshd_config > /etc/ssh/keys/sshd_config
+        SSHD_FLAGS="-f /etc/ssh/keys/sshd_config"
       fi
-      exec /usr/sbin/sshd -D ${@+"${@}"}
+
+      if [ ! -e /etc/ssh/keys/ssh_host_rsa_key ]; then
+        ${PRECMD} ssh-keygen -t rsa -f /etc/ssh/keys/ssh_host_rsa_key  -N '' -q
+      fi
+      if [ ! -e /etc/ssh/keys/ssh_host_ed25519_key ]; then
+        ${PRECMD} ssh-keygen -t ed25519 -f /etc/ssh/keys/ssh_host_ed25519_key  -N '' -q
+      fi
+      if [ ! -e /etc/ssh/keys/ssh_host_ecdsa_key ]; then
+        ${PRECMD} ssh-keygen -t ecdsa -f /etc/ssh/keys/ssh_host_ecdsa_key  -N '' -q
+      fi
+
+      exec ${PRECMD} /usr/sbin/sshd -D -f /etc/ssh/keys/sshd_config ${SSHD_FLAGS} ${@+"${@}"}
       ;;
 
     password)

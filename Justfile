@@ -36,20 +36,9 @@ function caseify()
         done
       )
       ;;
-    singular_setup) # Setup singularity install
-      VSCODE_SSH_CONFIG_DIR_DOCKER=/etc/ssh2 justify singular-compose exec vscode bash -c 'cp /etc/ssh/* /etc/ssh2/'
-      sed -i '/^ *Port .*/d;
-              /^ *UsePAM .*/d;
-              /^ *PasswordAuthentication .*/d;
-              /^ *UsePriviledgeSeparation.*/d' "${VSCODE_CWD}/singular/ssh_config/sshd_config"
-      echo >> "${VSCODE_CWD}/singular/ssh_config/sshd_config"
-      echo "Port ${VSCODE_SSHD_PORT}" >> "${VSCODE_CWD}/singular/ssh_config/sshd_config"
-      echo "UsePAM no" >> "${VSCODE_CWD}/singular/ssh_config/sshd_config"
-      echo "UsePrivilegeSeparation no" >> "${VSCODE_CWD}/singular/ssh_config/sshd_config"
-      echo "PasswordAuthentication no" >> "${VSCODE_CWD}/singular/ssh_config/sshd_config"
-      ;;
 
     run_vscode-server) # Run vscode server
+      echo "Port ${VSCODE_SSHD_PORT}" > "${VSCODE_CWD}/singular/keys/sshd_config"
       Just-docker-compose run --service-ports vscode ${@+"${@}"}
       extra_args=$#
       ;;

@@ -22,18 +22,19 @@ services:
       - source: ${VSCODE_CWD}
         target: /vscode
         type: bind
-      - source: ${VSCODE_SSH_CONFIG_DIR}
-        target: ${VSCODE_SSH_CONFIG_DIR_DOCKER}
-        type: ${VSCODE_SSH_CONFIG_DIR_TYPE}
+      - source: ${VSCODE_SSH_KEYS_DIR}
+        target: ${VSCODE_SSH_KEYS_DIR_DOCKER}
+        type: ${VSCODE_SSH_KEYS_DIR_TYPE}
       - source: ${VSCODE_DATA_DIR}
         target: ${VSCODE_DATA_DIR_DOCKER}
         type: ${VSCODE_DATA_DIR_TYPE}
-      - source: ${VSCODE_PASSWD_DIR}
-        target: ${VSCODE_PASSWD_DIR_DOCKER}
-        type: ${VSCODE_PASSWD_DIR_TYPE}
       - source: ${VSI_COMMON_DIR}
         target: /vsi
         type: bind
+      - source: ${HOME}/.ssh
+        target: /home/user/.ssh
+        type: bind
+        read_only: true
 
 volumes:
   ssh_keys:
