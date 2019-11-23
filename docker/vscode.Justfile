@@ -6,6 +6,9 @@ function caseify()
   shift 1
   case "${cmd}" in
     sshd) # Run sshd
+      ls /home -la
+      ls /home/andy -la
+      ls /home/user -la
       local PRECMD=
       local SSHD_FLAGS=
       if [ -z "${SINGULARITY_NAME+set}" ]; then
