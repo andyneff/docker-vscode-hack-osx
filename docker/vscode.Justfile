@@ -6,31 +6,30 @@ function caseify()
   shift 1
   case "${cmd}" in
     sshd) # Run sshd
-      ls /home -la
-      ls /home/andy -la
-      ls /home/user -la
-      local PRECMD=
-      local SSHD_FLAGS=
-      if [ -z "${SINGULARITY_NAME+set}" ]; then
-        PRECMD="gosu root"
-      else
-        sed -e '/^ *Port .*/d' \
-            -e '$aPort '"${VSCODE_SSHD_PORT}" \
-            /etc/ssh/sshd_config > /etc/ssh/keys/sshd_config
-        SSHD_FLAGS="-f /etc/ssh/keys/sshd_config"
+      if [ -L ~/.ssh ]; then
+        rm ~/.ssh
       fi
+      ln -sf /.user_ssh ~/.ssh
+      ep -d /etc/ssh/sshd_config 2>/dev/null > /etc/ssh/keys/sshd_config
 
+      ssh_version=($(sshd -? 2>&1 | sed -En 'n; s|^OpenSSH_([0-9]+)\.([0-9]+)([^ ,]*),?.*|\1 \2 \3|; p; q'))
       if [ ! -e /etc/ssh/keys/ssh_host_rsa_key ]; then
-        ${PRECMD} ssh-keygen -t rsa -f /etc/ssh/keys/ssh_host_rsa_key  -N '' -q
-      fi
-      if [ ! -e /etc/ssh/keys/ssh_host_ed25519_key ]; then
-        ${PRECMD} ssh-keygen -t ed25519 -f /etc/ssh/keys/ssh_host_ed25519_key  -N '' -q
-      fi
-      if [ ! -e /etc/ssh/keys/ssh_host_ecdsa_key ]; then
-        ${PRECMD} ssh-keygen -t ecdsa -f /etc/ssh/keys/ssh_host_ecdsa_key  -N '' -q
+        ssh-keygen -t rsa -f /etc/ssh/keys/ssh_host_rsa_key  -N '' -q
       fi
 
-      exec ${PRECMD} /usr/sbin/sshd -D -f /etc/ssh/keys/sshd_config ${SSHD_FLAGS} ${@+"${@}"}
+      if [ "${ssh_version[0]}${ssh_version[1]}" -ge "57" ] && \
+         [ ! -e /etc/ssh/keys/ssh_host_ecdsa_key ]; then
+        # Open ssh 5.7+
+        ssh-keygen -t ecdsa -f /etc/ssh/keys/ssh_host_ecdsa_key  -N '' -q
+      fi
+      if [ "${ssh_version[0]}${ssh_version[1]}" -ge "65" ] && \
+         [ ! -e /etc/ssh/keys/ssh_host_ed25519_key ]; then
+        # Open ssh 6.5+
+        ssh-keygen -t ed25519 -f /etc/ssh/keys/ssh_host_ed25519_key  -N '' -q
+      fi
+
+      set -x
+      exec /usr/sbin/sshd -d -D -f /etc/ssh/keys/sshd_config ${@+"${@}"}
       ;;
 
     password)

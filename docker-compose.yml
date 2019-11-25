@@ -17,7 +17,8 @@ services:
       - JUST_SETTINGS=/vscode/vscode.env
       - TZ
     ports:
-      - "${VSCODE_SSHD_PORT}:22"
+      # Don't use map translation to make singularity easier
+      - "${VSCODE_SSHD_PORT}:${VSCODE_SSHD_PORT}"
     volumes:
       - source: ${VSCODE_CWD}
         target: /vscode
@@ -31,10 +32,13 @@ services:
       - source: ${VSI_COMMON_DIR}
         target: /vsi
         type: bind
+      # Mount in a static non-home dir place for singularity compatibility.
       - source: ${HOME}/.ssh
-        target: /home/user/.ssh
+        target: /.user_ssh
         type: bind
         read_only: true
+    cap_add:
+      - SYS_PTRACE # Useful for gdb
 
 volumes:
   ssh_keys:

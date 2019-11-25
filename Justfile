@@ -32,13 +32,13 @@ function caseify()
         for instance in ${instances[@]+"${instances[@]}"}; do
           image="${instance}_image"
           docker_image="${instance}_docker_image"
-          justify singularity import -n "${!image}" "${!docker_image}"
+          # Singularity specific hacks for Centos 6 which has no overlayfs support
+          justify singularity import -n "${!image}" -m "/host /src /.user_ssh" "${!docker_image}"
         done
       )
       ;;
 
     run_vscode-server) # Run vscode server
-      echo "Port ${VSCODE_SSHD_PORT}" > "${VSCODE_CWD}/singular/keys/sshd_config"
       Just-docker-compose run --service-ports vscode ${@+"${@}"}
       extra_args=$#
       ;;
