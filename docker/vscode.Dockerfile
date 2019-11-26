@@ -5,7 +5,7 @@ FROM vsiri/recipe:ep as ep
 
 ###############################################################################
 
-FROM centos:6
+FROM centos:7
 
 SHELL ["/usr/bin/env", "bash", "-euxvc"]
 

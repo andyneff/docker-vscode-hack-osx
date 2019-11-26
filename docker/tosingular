@@ -1,0 +1,9 @@
+#!/usr/bin/env false bash
+
+# Make the CMD arguments behave like docker does
+if [ -n "${CMD}" ]; then
+  sed -i $'s|^exec .*|if [ $# = 0 ]; then\\\n  &\\\nelse\\\n  exec '"${ENTRYPOINT}"$' "${@}"\\\nfi|' "${build_sandbox}/.singularity.d/runscript"
+fi
+
+# Copy the run script to the start scipt, so that instance start does what we want
+cp "${build_sandbox}/.singularity.d/runscript" "${build_sandbox}/.singularity.d/startscript"

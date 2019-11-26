@@ -28,6 +28,7 @@ function caseify()
       justify build
       (
         . ${VSCODE_SINGULAR_COMPOSE_FILES}
+        export SINGULARITY_CUSTOM_IMPORT_SCRIPT="${VSCODE_CWD}/docker/tosingular"
 
         for instance in ${instances[@]+"${instances[@]}"}; do
           image="${instance}_image"
