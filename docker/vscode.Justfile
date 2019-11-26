@@ -29,7 +29,7 @@ function caseify()
       fi
 
       set -x
-      exec /usr/sbin/sshd -d -D -f /etc/ssh/keys/sshd_config ${@+"${@}"}
+      exec /usr/sbin/sshd -D -f /etc/ssh/keys/sshd_config ${@+"${@}"}
       ;;
 
     password)
