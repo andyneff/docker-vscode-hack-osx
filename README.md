@@ -7,96 +7,57 @@ This repository was made to provide files and instructions for implementing the 
 
 This fork has been expanded to use `just` and support older linux machines (CentOS 6) and machines not even running docker (singularity).
 
-Please keep all questions regarding this work-around here in this repository so that the official issue is not clogged like a forum thread.
-
-Please create an Issue here to ask your question.  Please check Closed Issues before asking your question.
-
-## Install
-
-1. `. setup.env`
-2. `just change password`
-3. `just run vscode-server`
-
-## Instructions
-
-### SSH keys
-
-This setup uses SSH keys, so make sure you have them setup both locally and remotely.
-
-Simplified instructions:
-1. `ssh-keygen -f ~/.ssh/id_rsa_debug`
-1. `scp ~/.ssh/id_rsa_debug.pub remoteserver:~/.ssh/`
-1. `ssh remoteserver bash -c 'cat ~/.ssh/id_rsa_debug.pub >> ~/.ssh/authorized_keys`
-
-It doesn't matter if the remote server doesn't allow ssh by ssh key, it will still work for the ssh server we will be setting up in a container.
+## Install on remote
 
 ### Docker on Remote Host
 
-1. Install [Docker](https://hub.docker.com/?overlay=onboarding).
-1. Open **Terminal**
-1. `git clone --recursive https://github.com/andyneff/docker-vscode-hack-osx.git`
+Everything is done on the remote host
+
+1. `git clone -b simple_singularity --recursive https://github.com/andyneff/docker-vscode-hack-osx.git`
 1. `cd docker-vscode-hack-osx`
 1. `. setup.env`
-1. `just up -d`
-    - Or `just up` to run in the foreground
+1. To run images in singularity
+  1. `just build singular`
+  1. `just install singular`
+1. Or to run images in docker (Do not try both, only the first will succeed)
+  1. `just build docker`
+  1. `just install docker`
 
-### Singularity on Remote Host
+
+### Docker Locally and singularity on Remote Host
 
 Assuming the remote doesn't and can't have docker on it,
 
 1. Local:
-    1. `git clone --recursive https://github.com/andyneff/docker-vscode-hack-osx.git`
+    1. `git clone -b simple_singularity --recursive https://github.com/andyneff/docker-vscode-hack-osx.git`
     1. `cd docker-vscode-hack-osx`
     1. `. setup.env`
     1. `just build singular`
 1. Remote:
-    1. `git clone --recursive https://github.com/andyneff/docker-vscode-hack-osx.git`
+    1. `git clone -b simple_singularity --recursive https://github.com/andyneff/docker-vscode-hack-osx.git`
 1. Local:
     1. `scp vscode_server.simg REMOTE_SERVER:/location/docker-vscode-hack-osx`
 1. Remote:
     1. `. setup.env`
-    1. `just singular-compose instance start vscode vscode_server`
-        - Or `just singular-compose run vscode` to run in the foreground
+    1. `just install`
 
-Method tested with singularity 2.6 and 3.4
+Tested with singularity 2.6 and 3.4
 
-### What if the remote server is behind a gateway/firewall?
+## FAQ
 
-If exposing a port on the local server does now expose it to you locally, no problem. Just use ssh port forwarding
+1. What if I have to put the image in an alternative location?
+  - Update your `local.env` on the remote machine with
 
-1. `ssh remoteserver -L 2222:localhost:2222`
-2. When filling out the config below, use `localhost` for the `HostName`
+    ```bash
+    vscode_image=alternative_location.simg
+    ```
 
-### Local Host
+1. What if I want to targe an older version of singularity, like 2.6?
+  - Update your `local.env` on the machine with docker to use the appropriate [tag](https://hub.docker.com/repository/docker/vsiri/docker2singularity/tags)
 
-Within VSCode:
+    ```bash
+    DOCKER2SINGULARITY_VERSION=v2.6
+    ```
 
-1. Click Remote Explorer
-1. Click Settings
-1. Edit .ssh/vscode.config
-
-**vscode.config**
-```
-Host osx-remote-debug
-    HostName IP.AD.DR.ESS
-    User user
-    Port 2222
-    StrictHostKeyChecking no
-    UserKnownHostsFile=/dev/null
-    IdentityFile ~/.ssh/id_rsa_debug
-```
-
-The `User` field should have your username on the remote server. In the docker case, it is always `user`. In singularity, it is the username you have outside the container, since singularity copies that in. `IdentityFile` might also be different, depending on how you set it up.
-
-## Caveats
-
-### macos Permissions
-
-In the `docker run` statement above, I am mapping my home directory to `/opt` on the Remote Host.  This may or may not be what you want, depending on your development environment.   If you map to `/opt`, upon first connection, **Docker** will attempt to enumerate all directories and prompt you for access.  If you have mapped to your home directory, Docker may prompt for additional permissions ("Documents", "Desktop", "Downloads", etc) on the remote.
-
-```
-"Docker" would like to access files in your Documents folder.
-                           [ Don't Allow ]         [ OK ]
-```
-
-If you click `[ Don't Allow ]`, you will not be able to remotely see files in that folder.
+1. Why does it sometimes fail on docker, but work the second time?
+  - It takes a few seconds to create a docker container depending on the kernel, os, and filesystem used. This may exceed the maximum wait time vscode (client) is willing to wait for the server to start. The solution _is_ to try a second time, since the first attempt will have started the server process, and it will still be running for a few minutes.
