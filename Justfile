@@ -31,12 +31,28 @@ function caseify()
         export SINGULARITY_CUSTOM_IMPORT_SCRIPT="${VSCODE_CWD}/docker/tosingular"
 
         for instance in ${instances[@]+"${instances[@]}"}; do
-          image="${instance}_image"
           docker_image="${instance}_docker_image"
           # Singularity specific hacks for Centos 6 which has no overlayfs support
-          justify singularity import -n "${!image}" -m "/host /src /.user_ssh" "${!docker_image}"
+          justify singular-compose import "${instance}" "${!docker_image}"
         done
       )
+      ;;
+
+    run_singular) # Run vscode in singularity
+      SINGULARITY_EXEC=1 justify singular-compose run vscode ${@+"${@}"}
+      ;;
+
+    install) # Install
+      if [ ! -x ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node_exe ]; then
+        mv ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node_exe
+        echo '#!/usr/bin/env bash' > ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node
+        echo "source \"${VSCODE_CWD}/setup.env\"" >> ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node
+        echo 'just run singular "${@}"' >> ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node
+        chmod 755 ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node
+        echo "Installed" >&2
+      else
+        echo "Already installed" >&2
+      fi
       ;;
 
     run_vscode-server) # Run vscode server

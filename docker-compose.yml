@@ -11,35 +11,26 @@ services:
       - DOCKER_UID=${VSCODE_UID}
       - DOCKER_GIDS=${VSCODE_GIDS}
       - DOCKER_GROUP_NAMES=${VSCODE_GROUP_NAMES}
-      - DOCKER_USERNAME=user
-      # - DISPLAY
+      - DOCKER_USERNAME=${VSCODE_USERNAME}
       - JUSTFILE=/vscode/docker/vscode.Justfile
       - JUST_SETTINGS=/vscode/vscode.env
       - TZ
-    ports:
-      # Don't use map translation to make singularity easier
-      - "${VSCODE_SSHD_PORT}:${VSCODE_SSHD_PORT}"
+      - VSCODE_COMMIT=${VSCODE_SERVER_SHA}
     volumes:
       - source: ${VSCODE_CWD}
         target: /vscode
         type: bind
-      - source: ${VSCODE_SSH_KEYS_DIR}
-        target: ${VSCODE_SSH_KEYS_DIR_DOCKER}
-        type: ${VSCODE_SSH_KEYS_DIR_TYPE}
       - source: ${VSCODE_DATA_DIR}
         target: ${VSCODE_DATA_DIR_DOCKER}
         type: ${VSCODE_DATA_DIR_TYPE}
+      - source: ${VSCODE_HOME_DIR}
+        target: ${VSCODE_HOME_DIR_DOCKER}
+        type: ${VSCODE_HOME_DIR_TYPE}
       - source: ${VSI_COMMON_DIR}
         target: /vsi
         type: bind
-      # Mount in a static non-home dir place for singularity compatibility.
-      - source: ${HOME}/.ssh
-        target: /.user_ssh
-        type: bind
-        read_only: true
     cap_add:
       - SYS_PTRACE # Useful for gdb
-
 volumes:
   ssh_keys:
   passwd:
