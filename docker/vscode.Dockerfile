@@ -24,4 +24,4 @@ ENTRYPOINT ["/usr/local/bin/tini", "--", \
             "/usr/bin/env", "bash", "/vsi/linux/just_entrypoint.sh", \
             "bash", "-c", "~/.vscode-server/bin/${VSCODE_COMMIT}/node_exe \"${@}\"", "node"]
 
-CMD ["--help"]
+CMD []

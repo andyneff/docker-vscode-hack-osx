@@ -38,21 +38,24 @@ function caseify()
       )
       ;;
 
-    run_singular) # Run vscode in singularity
+    run_singular) # Run nodejs in singularity
       SINGULARITY_EXEC=1 justify singular-compose run vscode ${@+"${@}"}
       ;;
 
     install) # Install
-      if [ ! -x ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node_exe ]; then
-        mv ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node_exe
-        echo '#!/usr/bin/env bash' > ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node
-        echo "source \"${VSCODE_CWD}/setup.env\"" >> ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node
-        echo 'just run singular "${@}"' >> ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node
-        chmod 755 ~/.vscode-server/bin/8795a9889db74563ddd43eb0a897a2384129a619/node
-        echo "Installed" >&2
-      else
-        echo "Already installed" >&2
-      fi
+      local commit
+      for commit in ~/.vscode-server/bin/*; do
+        if [ ! -x "${commit}/node_exe" ]; then
+          mv "${commit}/node" "${commit}/node_exe"
+          echo '#!/usr/bin/env bash' > "${commit}/node"
+          echo "source \"${VSCODE_CWD}/setup.env\"" >> "${commit}/node"
+          echo 'just run singular "${@}"' >> "${commit}/node"
+          chmod 755 "${commit}/node"
+          echo "Installed in ${commit}" >&2
+        else
+          echo "Already installed in ${commit}" >&2
+        fi
+      done
       ;;
 
     run_vscode-server) # Run vscode server
@@ -62,17 +65,6 @@ function caseify()
     shell) # Run vscode server shell (for debugging)
       Just-docker-compose run vscode bash ${@+"${@}"}
       extra_args=$#
-      ;;
-    up) # Start up ssh daemon
-      Just-docker-compose up ${@+"${@}"}
-      extra_args=$#
-      ;;
-    down) # Shut down ssh daemon
-      Just-docker-compose down ${@+"${@}"}
-      extra_args=$#
-      ;;
-    change_password) # Change root password
-      Just-docker-compose run vscode password
       ;;
 
     sync) # Synchronize the many aspects of the project when new code changes \
