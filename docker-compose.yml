@@ -21,6 +21,9 @@ services:
       - source: ${VSCODE_DATA_DIR}
         target: ${VSCODE_DATA_DIR_DOCKER}
         type: ${VSCODE_DATA_DIR_TYPE}
+      - source: ${VSCODE_TMP_DIR}
+        target: ${VSCODE_TMP_DIR_DOCKER}
+        type: ${VSCODE_TMP_DIR_TYPE}
       - source: ${VSCODE_HOME_DIR}
         target: ${VSCODE_HOME_DIR_DOCKER}
         type: ${VSCODE_HOME_DIR_TYPE}

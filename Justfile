@@ -53,9 +53,10 @@ function caseify()
         if [ ! -x "${commit}/node_exe" ]; then
           mv "${commit}/node" "${commit}/node_exe"
           echo '#!/usr/bin/env bash' > "${commit}/node"
+          echo "source \"${VSCODE_CWD}/setup.env\"" >> "${commit}/node"
           echo "export JUSTFILE=\"${VSCODE_CWD}/Justfile\"" >> "${commit}/node"
           # echo 'echo "${@}" >> /tmp/node_debug.txt' >> "${commit}/node"
-          echo "exec \"${VSCODE_CWD}/external/vsi_common/linux/just\" run ${platform} "'"${BASH_SOURCE[0]}" "${@}"' >> "${commit}/node"
+          echo "exec just run ${platform} "'"${BASH_SOURCE[0]}" "${@}"' >> "${commit}/node"
           chmod 755 "${commit}/node"
           echo "Installed in ${commit}" >&2
         else
