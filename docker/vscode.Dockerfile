@@ -9,7 +9,7 @@ FROM centos:7
 
 SHELL ["/usr/bin/env", "bash", "-euxvc"]
 
-RUN yum install -y ca-certificates; \
+RUN yum install -y git ca-certificates; \
     rm -rf /var/cache/yum
 
 COPY --from=tini /usr/local /usr/local
@@ -18,10 +18,9 @@ RUN chmod u+s /usr/local/bin/gosu
 COPY --from=ep /usr/local /usr/local
 COPY --from=vsi /vsi /vsi
 ADD vscode.env /vscode/
-ADD docker/vscode.Justfile /vscode/docker/
 
 ENTRYPOINT ["/usr/local/bin/tini", "--", \
             "/usr/bin/env", "bash", "/vsi/linux/just_entrypoint.sh", \
-            "bash", "-c", "~/.vscode-server/bin/${VSCODE_COMMIT}/node_exe \"${@}\"", "node"]
+            "bash", "-c", "\"${0}_exe\" \"${@}\""]
 
 CMD []

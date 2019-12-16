@@ -28,11 +28,9 @@ function caseify()
       justify build
       (
         . ${VSCODE_SINGULAR_COMPOSE_FILES}
-        export SINGULARITY_CUSTOM_IMPORT_SCRIPT="${VSCODE_CWD}/docker/tosingular"
 
         for instance in ${instances[@]+"${instances[@]}"}; do
           docker_image="${instance}_docker_image"
-          # Singularity specific hacks for Centos 6 which has no overlayfs support
           justify singular-compose import "${instance}" "${!docker_image}"
         done
       )
@@ -48,12 +46,26 @@ function caseify()
         if [ ! -x "${commit}/node_exe" ]; then
           mv "${commit}/node" "${commit}/node_exe"
           echo '#!/usr/bin/env bash' > "${commit}/node"
-          echo "source \"${VSCODE_CWD}/setup.env\"" >> "${commit}/node"
-          echo 'just run singular "${@}"' >> "${commit}/node"
+          echo "export JUSTFILE=\"${VSCODE_CWD}/Justfile\"" >> "${commit}/node"
+          # echo 'echo "${@}" >> /tmp/node_debug.txt' >> "${commit}/node"
+          echo "exec \"${VSCODE_CWD}/external/vsi_common/linux/just\" run singular "'"${BASH_SOURCE[0]}" "${@}"' >> "${commit}/node"
           chmod 755 "${commit}/node"
           echo "Installed in ${commit}" >&2
         else
           echo "Already installed in ${commit}" >&2
+        fi
+      done
+      ;;
+
+    uninstall) # Uninstall
+      local commit
+      for commit in ~/.vscode-server/bin/*; do
+        if [ -x "${commit}/node_exe" ]; then
+          rm "${commit}/node"
+          mv "${commit}/node_exe" "${commit}/node"
+          echo "Uninstalled in ${commit}" >&2
+        else
+          echo "Already uninstalled in ${commit}" >&2
         fi
       done
       ;;

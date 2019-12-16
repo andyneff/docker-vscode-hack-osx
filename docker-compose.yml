@@ -12,10 +12,8 @@ services:
       - DOCKER_GIDS=${VSCODE_GIDS}
       - DOCKER_GROUP_NAMES=${VSCODE_GROUP_NAMES}
       - DOCKER_USERNAME=${VSCODE_USERNAME}
-      - JUSTFILE=/vscode/docker/vscode.Justfile
       - JUST_SETTINGS=/vscode/vscode.env
       - TZ
-      - VSCODE_COMMIT=${VSCODE_SERVER_SHA}
     volumes:
       - source: ${VSCODE_CWD}
         target: /vscode
@@ -29,8 +27,6 @@ services:
       - source: ${VSI_COMMON_DIR}
         target: /vsi
         type: bind
+    network_mode: host
     cap_add:
       - SYS_PTRACE # Useful for gdb
-volumes:
-  ssh_keys:
-  passwd:
