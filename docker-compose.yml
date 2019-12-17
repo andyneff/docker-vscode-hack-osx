@@ -12,15 +12,13 @@ services:
       - DOCKER_GIDS=${VSCODE_GIDS}
       - DOCKER_GROUP_NAMES=${VSCODE_GROUP_NAMES}
       - DOCKER_USERNAME=${VSCODE_USERNAME}
+      - DOCKER_HOME=${VSCODE_HOME}
       - JUST_SETTINGS=/vscode/vscode.env
       - TZ
     volumes:
       - source: ${VSCODE_CWD}
         target: /vscode
         type: bind
-      - source: ${VSCODE_DATA_DIR}
-        target: ${VSCODE_DATA_DIR_DOCKER}
-        type: ${VSCODE_DATA_DIR_TYPE}
       - source: ${VSCODE_TMP_DIR}
         target: ${VSCODE_TMP_DIR_DOCKER}
         type: ${VSCODE_TMP_DIR_TYPE}

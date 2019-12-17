@@ -75,3 +75,10 @@ Tested with singularity 2.6 and 3.4
   - Could you clarify?
     - "Yes"
       - Well, you see the version of `node` and the node native compiled plugins that runs as the `vscode-server` require a modern version of glibc. This is why you can't just replace the `node` executable, it is the plugins that cause the real requirement for modern glibc. The `install` targets replace the `node` command with a shim script that will call the real node executable (`node_exe` after install) inside a container using `just`.
+        - `/` is mounted in as `/host`
+        - Singularity does its thing, and mounts a lot of things in for you, and set environments variables
+        - Docker take similar actions, only manually
+          - Mounts in your home dir and tmp
+          - Creates a user mimicking your real credentials in the container
+          - Changes to the same dir (only if it was already mounted). This limitation has no consequence, since all the commands are run from the home dir, and that is mounted in.
+          - Some environment variables may not show up in docker, since it doesn't add everything like singularity does. However, it appears that vscode-server cleanses most of the environment variables when running `node`, so the result should actually be the same. If this is not the case _and_ is a problem, open an issue.

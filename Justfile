@@ -26,7 +26,7 @@ function caseify()
       fi
       ;;
     build_singular) # Build singularity images for terra dsm
-      justify build
+      justify build docker
       (
         . ${VSCODE_SINGULAR_COMPOSE_FILES}
 
